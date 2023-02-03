@@ -106,14 +106,14 @@ fn parse(file_path: &str, rows: usize, columns: usize) -> Vec<Vec<Node>>{
 
 fn solve(maze: &mut Vec<Vec<Node>>, start_x: usize, start_y: usize) -> Option<Vec<(usize, usize)>> {
 	let path = Vec::new();
-	let mut visited = vec![vec![false; maze[0].len()]; maze.len()];
+	let visited = vec![vec![false; maze[0].len()]; maze.len()];
 	let mut que = VecDeque::new();
 
 	let mut key_inventory = 0;
 
-	que.push_back((start_x, start_y, path));
-	while let Some((x, y, curr_path)) = que.pop_back() {
-		visited[x][y] = true;
+	que.push_back((start_x, start_y, path, visited));
+	while let Some((x, y, curr_path, visited)) = que.pop_back() {
+		// visited[x][y] = true;
 
 		let mut node = maze[x][y];
 
@@ -130,36 +130,59 @@ fn solve(maze: &mut Vec<Vec<Node>>, start_x: usize, start_y: usize) -> Option<Ve
 			// Pick up key
 			key_inventory += 1;
 			println!("Key picked up, {} in inventory ! ({}, {})", key_inventory, x, y);
+
+			// Remove key
 			node.key = 0;
 			maze[x][y] = node;
 			
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
-			que.push_back((x, y, new_path));
+
+			let mut new_visited = visited.clone();
+
+			// Magic
+			if x != 0 { new_visited[x-1][y] = false; }
+			if x != 5 { new_visited[x+1][y] = false; }
+			if y != 0 { new_visited[x][y-1] = false; }
+			if y != 8 { new_visited[x][y+1] = false; }
+
+			que.push_back((x, y, new_path, new_visited));
 		}
 
 		if node.north == 0 && !visited[x - 1][y] {
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
-			que.push_back((x - 1, y, new_path));
+
+			let mut new_visited = visited.clone();
+			new_visited[x][y] = true;
+			que.push_back((x - 1, y, new_path, new_visited));
 		}
 
 		if node.south == 0 && !visited[x + 1][y] {
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
-			que.push_back((x + 1, y, new_path));
+
+			let mut new_visited = visited.clone();
+			new_visited[x][y] = true;
+			que.push_back((x + 1, y, new_path, new_visited));
 		}
 
 		if node.west == 0 && !visited[x][y - 1] {
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
-			que.push_back((x, y - 1, new_path));
+
+			let mut new_visited = visited.clone();
+			new_visited[x][y] = true;
+			que.push_back((x, y - 1, new_path, new_visited));
 		}
 
 		if node.east == 0 && !visited[x][y + 1] {
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
-			que.push_back((x, y + 1, new_path));
+
+			let mut new_visited = visited.clone();
+			new_visited[x][y] = true;
+			que.push_back((x, y + 1, new_path, new_visited));
 		}
 	
 		// Open doors
@@ -172,7 +195,10 @@ fn solve(maze: &mut Vec<Vec<Node>>, start_x: usize, start_y: usize) -> Option<Ve
 
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
-			que.push_back((x - 1, y, new_path));
+
+			let mut new_visited = visited.clone();
+			new_visited[x][y] = true;
+			que.push_back((x - 1, y, new_path, new_visited));
 		}
 
 		if node.south == 2 && key_inventory > 0 && !visited[x + 1][y]{
@@ -183,7 +209,10 @@ fn solve(maze: &mut Vec<Vec<Node>>, start_x: usize, start_y: usize) -> Option<Ve
 
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
-			que.push_back((x + 1, y, new_path));
+
+			let mut new_visited = visited.clone();
+			new_visited[x][y] = true;
+			que.push_back((x + 1, y, new_path, new_visited));
 		}
 
 		if node.west == 2 && key_inventory > 0 && !visited[x][y - 1]{
@@ -194,7 +223,10 @@ fn solve(maze: &mut Vec<Vec<Node>>, start_x: usize, start_y: usize) -> Option<Ve
 
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
-			que.push_back((x, y - 1, new_path));
+
+			let mut new_visited = visited.clone();
+			new_visited[x][y] = true;
+			que.push_back((x, y - 1, new_path, new_visited));
 		}
 
 		if node.east == 2 && key_inventory > 0 && !visited[x][y + 1]{
@@ -205,10 +237,14 @@ fn solve(maze: &mut Vec<Vec<Node>>, start_x: usize, start_y: usize) -> Option<Ve
 
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
-			que.push_back((x, y + 1, new_path));
+
+			let mut new_visited = visited.clone();
+			new_visited[x][y] = true;
+			que.push_back((x, y + 1, new_path, new_visited));
 		}
 	}
 
+	println!("No viable options !");
 	None
 }
 
@@ -234,7 +270,8 @@ fn main() {
     //     }
     //     println!("_____________");
     // }
-
+	
+	// Solving
 	let final_path = solve(&mut maze, start_x, start_y);
 
 	for field in final_path{
