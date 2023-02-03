@@ -1,8 +1,10 @@
 //Filip Pinjuh E254-2022
 use std::fs;
+use std::collections::VecDeque;
 
 #[derive(Clone, Copy, Debug)]
 pub enum Dir {
+	// Legacy - to be deleted
 	Up,
   	Down,
   	Left,
@@ -35,14 +37,7 @@ impl Default for Node {
 	}
 }
 
-fn parse(){
-
-  	// Path to maze
-	let file_path="./src/maze.txt";
-
-	// Set maze size
-	let rows = 9;
-    let columns = 6;
+fn parse(file_path: &str, rows: usize, columns: usize) -> Vec<Vec<Node>>{
 
  	let maze_raw = fs::read_to_string(file_path)
 		.expect("Error while reading file!");
@@ -105,16 +100,122 @@ fn parse(){
 		maze_matrix[index / 9][index % 9] = node;
 	}
 
-	// Maze sanity print
-	for row in maze_matrix {
-        for node in row {
-            print!("{:#?} ", node);
-        }
-        println!("_____________");
-    }
+	maze_matrix
+}
 
+fn solve(maze: &Vec<Vec<Node>>) -> Option<Vec<(usize, usize)>> {
+	let path = Vec::new();
+	let mut visited = vec![vec![false; maze.len()]; maze[0].len()];
+	let mut stack = VecDeque::new();
+
+	let start_x = 0;
+	let start_y = 0;
+
+	let mut key_inventory = 0;
+
+	stack.push_back((start_x, start_y, path));
+	while let Some((x, y, curr_path)) = stack.pop_back() {
+		visited[x][y] = true;
+
+		let node = &maze[x][y];
+
+		if node.exit == 1 {
+			// Sanity yet
+			println!("Maze solved !");
+
+			let mut new_path = curr_path.clone();
+			new_path.push((x, y));
+			return Some(new_path);
+		}
+
+		if node.key == 1 {
+			key_inventory += 1;
+			// let mut new_path = curr_path.clone();
+			// new_path.push((x, y));
+			// stack.push_back((x, y, new_path));
+		}
+
+		if node.north == 0 && !visited[x - 1][y] {
+			let mut new_path = curr_path.clone();
+			new_path.push((x, y));
+			stack.push_back((x - 1, y, new_path));
+		}
+
+		if node.south == 0 && !visited[x + 1][y] {
+			let mut new_path = curr_path.clone();
+			new_path.push((x, y));
+			stack.push_back((x + 1, y, new_path));
+		}
+
+		if node.west == 0 && !visited[x][y - 1] {
+			let mut new_path = curr_path.clone();
+			new_path.push((x, y));
+			stack.push_back((x, y - 1, new_path));
+		}
+
+		if node.east == 0 && !visited[x][y + 1] {
+			let mut new_path = curr_path.clone();
+			new_path.push((x, y));
+			stack.push_back((x, y + 1, new_path));
+		}
+		
+		// Open doors
+		if node.north == 2 && key_inventory > 0 && !visited[x - 1][y] {
+			key_inventory -= 1;
+			let mut new_path = curr_path.clone();
+			new_path.push((x, y));
+			stack.push_back((x - 1, y, new_path));
+		}
+
+		if node.south == 2 && key_inventory > 0 && !visited[x + 1][y] {
+			key_inventory -= 1;
+			let mut new_path = curr_path.clone();
+			new_path.push((x, y));
+			stack.push_back((x + 1, y, new_path));
+		}
+
+		if node.west == 2 && key_inventory > 0 && !visited[x][y - 1] {
+			key_inventory -= 1;
+			let mut new_path = curr_path.clone();
+			new_path.push((x, y));
+			stack.push_back((x, y - 1, new_path));
+		}
+
+		if node.east == 2 && key_inventory > 0 && !visited[x][y + 1] {
+			key_inventory -= 1;
+			let mut new_path = curr_path.clone();
+			new_path.push((x, y));
+			stack.push_back((x, y + 1, new_path));
+		}
+	}
+
+	None
 }
 
 fn main() {
-	parse();
+	// Path to maze
+	let file_path="./src/maze.txt";
+
+	// Set maze size
+	let rows = 9;
+	let columns = 6;
+	
+	// Parsing
+	let maze: Vec<Vec<Node>> = parse(file_path, rows, columns);
+
+	// Maze sanity print
+	// for row in &maze {
+    //     for node in row {
+    //         print!("{:#?} ", node);
+    //     }
+    //     println!("_____________");
+    // }
+	
+	let final_path = solve(&maze);
+
+	for field in final_path{
+		print!("{:?}", field);
+		println!();
+	}
+
 }
