@@ -135,8 +135,8 @@ fn solve(maze: &mut Vec<Vec<Node>>, start_x: usize, start_y: usize) -> Option<Ve
 			node.key = 0;
 			maze[x][y] = node;
 			
-			let mut new_path = curr_path.clone();
-			new_path.push((x, y));
+			let new_path = curr_path.clone();
+			// new_path.push((x, y));
 
 			let mut new_visited = visited.clone();
 
