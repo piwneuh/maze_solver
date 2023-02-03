@@ -138,43 +138,30 @@ fn solve(maze: &mut Vec<Vec<Node>>, start_x: usize, start_y: usize) -> Option<Ve
 			stack.push_back((x, y, new_path));
 		}
 
-		if x == 0{
-			//println!("We reached the edge! ({}, {})", x, y);
-		}
-		else if node.north == 0 && !visited[x - 1][y] {
+		if node.north == 0 && !visited[x - 1][y] {
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
 			stack.push_back((x - 1, y, new_path));
 		}
 
-		if x >= 5{
-			//println!("We reached the edge! ({}, {})", x, y);
-		}
-		else if node.south == 0 && !visited[x + 1][y] {
+		if node.south == 0 && !visited[x + 1][y] {
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
 			stack.push_back((x + 1, y, new_path));
 		}
 
-		if y == 0{
-			//println!("We reached the edge! ({}, {})", x, y);
-		}
-		else if node.west == 0 && !visited[x][y - 1] {
+		if node.west == 0 && !visited[x][y - 1] {
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
 			stack.push_back((x, y - 1, new_path));
 		}
 
-		if y >= 5{
-			//println!("We reached the edge! ({}, {})", x, y);
-		}
-		else if node.east == 0 && !visited[x][y + 1] {
+		if node.east == 0 && !visited[x][y + 1] {
 			let mut new_path = curr_path.clone();
 			new_path.push((x, y));
 			stack.push_back((x, y + 1, new_path));
 		}
 	
-		
 		// Open doors
 		if node.north == 2 && key_inventory > 0 && !visited[x - 1][y] {
 			// Remove door
