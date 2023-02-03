@@ -42,21 +42,21 @@ fn parse(){
 
 	// Set maze size
 	let rows = 9;
-    let columns = 54;
+    let columns = 6;
 
  	let maze_raw = fs::read_to_string(file_path)
 		.expect("Error while reading file!");
 
-    let mut maze_matrix: Vec<Node> = vec![Node { ..Default::default()}; columns];
+    let mut maze_matrix: Vec<Vec<Node>> = vec![vec![Node { ..Default::default()};rows]; columns];
 
-	for (row_index, row) in maze_raw.lines().enumerate(){
+	for (index, row) in maze_raw.lines().enumerate(){
 		let mut west: u32 = 0;
 		let mut east: u32 = 0;
 		let mut north: u32 = 0;
 		let mut south: u32 = 0;
 
 		let mut key: u32 = 0;
-		let mut end: u32 = 0;
+		let mut exit: u32 = 0;
 
 		// Check for walls
 		if row.chars().nth(0) == Some('0'){
@@ -96,20 +96,23 @@ fn parse(){
 		if row.chars().nth(10) == Some('1') && row.chars().nth(11) == Some('1'){
 			key = 1;
 		}; 
-
-		//Check for end
+		
+		//Check for exit
 		if row.chars().nth(12) == Some('1') && row.chars().nth(13) == Some('1'){
-			end = 1;
+			exit = 1;
 		};
-		let node = Node{ west: west, east:east, north:north, south:south, key:key, exit:end};
-		maze_matrix[row_index] = node;
+		let node = Node{ west: west, east:east, north:north, south:south, key:key, exit:exit};
+		maze_matrix[index / 9][index % 9] = node;
 	}
 
 	// Maze sanity print
-	for row in &maze_matrix {
-		print!("{:#?} ", row);
-		println!();
-	}
+	for row in maze_matrix {
+        for node in row {
+            print!("{:#?} ", node);
+        }
+        println!("_____________");
+    }
+
 }
 
 fn main() {
